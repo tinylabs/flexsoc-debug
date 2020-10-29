@@ -1,0 +1,67 @@
+CAPI=2:
+name: ::flexsoc_debug:0.1
+description: Hi-speed hardware debugger
+
+filesets:
+    rtl:
+        depend:
+            - ahb3lite_host_master
+            - ahb3lite_remote_bridge2
+            - ahb3lite_csr
+            - uart_fifo
+            - fifo_arb
+            - ahb3lite_pkg
+        files:
+            - rtl/flexsoc_debug.sv
+        file_type: verilogSource
+        
+    gen_deps:
+        depend:
+            - ahb3lite_csr
+
+    sim_tb:
+        depend:
+            - verilator_utils
+        files:
+            - bench/tb.cpp : {file_type : cppSource}
+            
+generate:
+    flexdbg_csr:
+        generator: ahb3lite_csr_gen
+        parameters:
+            instance: csr_ahb3
+            registers:
+                flexsoc_id:
+                    width: 32
+                    type: ro
+                dummy:
+                    width: 32
+                    type: ro
+
+
+targets:
+    default: &base
+             generate: [flexdbg_csr]
+             filesets: [gen_deps, rtl]
+
+    # Used for CSR generation
+    lint:
+        <<: *base
+        toplevel: [flexsoc_debug]
+        default_tool: verilator
+        tools:
+            verilator:
+                mode: lint-only
+
+    sim:
+        <<: *base
+        description: Simulate flexsoc_debug
+        default_tool: verilator
+        filesets_append: [sim_tb]
+        toplevel: [flexsoc_debug]
+        tools:
+            verilator:
+                verilator_options: [-sv, --cc, --trace, --clk, CLK]
+                #make_options: [OPT_FAST=-Ofast]
+                run_options: [--vcd=sim.vcd, --timeout=3000]
+
