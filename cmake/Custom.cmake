@@ -25,8 +25,7 @@ function( gen_csr TARGET )
     )
   add_dependencies( ${TARGET} gen_csr )
   include_directories( ${PROJECT_BINARY_DIR}/generated )
-  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_BINARY_DIR}/csr_generated.txt )
-  
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_BINARY_DIR}/csr_generated.txt )  
 endfunction( gen_csr )
   
 macro( test_setup )

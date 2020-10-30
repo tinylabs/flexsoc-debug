@@ -74,9 +74,10 @@ static uint32_t *read_bin (const char *filename, long *size)
 int flexdbg (args_t *args)
 {
   Target *target;
-  uint32_t devid;
+  uint32_t devid, val;
   char *device;
-
+  adiv5_stat_t stat;
+  
   // Copy device as it's modified inplace if simulator
   device = (char *)malloc (strlen (args->device + 1));
   strcpy (device, args->device);
@@ -84,16 +85,69 @@ int flexdbg (args_t *args)
   // Find hardware
   target = Target::Ptr (device);
 
+  // Check interface
+  if (target->Validate ())
+    log (LOG_FATAL, "CSR mismatch - Regenerate FPGA/CSR!");
+  
   // Read device_id
   devid = target->FlexsocID ();
   if ((devid >> 4) == 0xF1ecdb6)
-    log_nonl (LOG_NORMAL, "FlexDbg v%d\n", devid & 0xf);
+    log_nonl (LOG_NORMAL, "FlexDebug v%d\n", devid & 0xf);
   else
-    log (LOG_ERR, "FlexDbg not found!\n");
+    log (LOG_ERR, "FlexDebug not found!\n");
 
   // Register handler for shutdown
   signal (SIGINT, &shutdown);
-    
+
+  // Switch to SWD
+  target->Mode (MODE_SWD);
+  
+  // Send reset + switch
+  target->Reset (1);
+
+  // Read IDcode
+  stat = target->ReadDP (0, &val);
+  if (stat == ADIv5_OK)
+    printf ("IDCODE=%08X\n", val);
+  else
+    printf ("Error: %s\n", target->ADIv5_Stat (stat));
+
+  // Enable debug
+  stat = target->WriteDP (4, 0x50000000);
+  printf ("%s\n", target->ADIv5_Stat (stat));
+  stat = target->ReadDP (4, &val);
+  printf ("%08X %s\n", val, target->ADIv5_Stat (stat));
+
+  // Read AP[0] IDR
+  stat = target->ReadAP (0, 0xfc, &val);
+  printf ("%08X %s\n", val, target->ADIv5_Stat (stat));
+
+  // Change div
+  target->ClkDiv (2);
+  
+  // Switch to JTAG
+  target->Mode (MODE_JTAG);
+  
+  // Send reset + switch
+  target->Reset (1);
+
+  // Read IDcode
+  stat = target->ReadDP (0, &val);
+  if (stat == ADIv5_OK)
+    printf ("IDCODE=%08X\n", val);
+  else
+    printf ("Error: %s\n", target->ADIv5_Stat (stat));
+
+  // Enable debug
+  stat = target->WriteDP (4, 0x50000000);
+  printf ("%s\n", target->ADIv5_Stat (stat));
+  stat = target->ReadDP (4, &val);
+  printf ("%08X %s\n", val, target->ADIv5_Stat (stat));
+
+  // Read AP[0] IDR
+  stat = target->ReadAP (0, 0xfc, &val);
+  printf ("%08X %s\n", val, target->ADIv5_Stat (stat));
+
   // Close device
   delete target;
 

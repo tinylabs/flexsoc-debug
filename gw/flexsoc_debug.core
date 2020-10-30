@@ -34,10 +34,29 @@ generate:
                 flexsoc_id:
                     width: 32
                     type: ro
-                dummy:
+                # System control
+                jtag_n_swd:
+                    width: 1
+                    type: rw
+                jtag_direct:
+                    width: 1
+                    type: rw
+                clkdiv:
+                    width: 4
+                    type: rw
+                # ADIv5 interface
+                adiv5_cmd:
+                    width: 4
+                    type: wo
+                    strobe: 1
+                adiv5_data:
                     width: 32
+                    type: rw
+                    strobe: 1
+                adiv5_status:
+                    width: 5
                     type: ro
-
+                    strobe: 1
 
 targets:
     default: &base

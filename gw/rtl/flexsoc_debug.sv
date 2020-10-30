@@ -66,7 +66,9 @@ module flexsoc_debug
    // Bridge AHB3 slave
    logic        bridge_ahb3_HRESP, bridge_ahb3_HSEL, bridge_ahb3_HREADYOUT;
    logic [31:0] bridge_ahb3_HRDATA;
-
+   // TODO: Remove after bridge working
+   assign bridge_ahb3_HREADYOUT = 1'b1;
+   
    // Basic routing
    // >= 0xF000.0000 = CSR
    // else BRIDGE
@@ -74,14 +76,42 @@ module flexsoc_debug
                           1 : 0;
    assign bridge_ahb3_HSEL = ((host_ahb3_HTRANS == HTRANS_NONSEQ) && (host_ahb3_HADDR < 32'hF000_0000)) ?
                              1 : 0;
+
+   // ADIv5 CSR logic
+   logic [31:0]               adiv5_data;
+   logic                      adiv5_ready, adiv5_busy;   
+   logic                      adiv5_rden, adiv5_rdempty;
+   logic [2:0]                adiv5_stat;
+
+   // CSR <=> ADIv5 FIFO interface
+   assign adiv5_rden = !adiv5_rdempty & !adiv5_ready;
+   assign adiv5_status = {adiv5_stat, adiv5_ready, adiv5_busy};
+   assign adiv5_data_i = adiv5_ready ? adiv5_data : adiv5_data_o;
+
+   // Feed RW CSRs back
+   assign jtag_n_swd_i = jtag_n_swd_o;
+   assign jtag_direct_i = jtag_direct_o;
+   assign clkdiv_i = clkdiv_o;
+   
    // Assign return path to last selection
    logic        csr_sel;
    always @(posedge CLK)
      begin
+        // Select peripheral to route back to AHB3 master
         if (csr_ahb3_HSEL)
           csr_sel <= 1;
         else
           csr_sel <= 0;
+
+        // Set ready when data available
+        if (adiv5_rden)
+          adiv5_ready <= 1;
+        // For WRITE clear on READ status
+        else if (!adiv5_cmd[0] & adiv5_status_stb)
+          adiv5_ready <= 0;
+        // For READ clear on READ data
+        else if (adiv5_cmd[0] & adiv5_data_stb)
+          adiv5_ready <= 0;
      end
 
    // AHB3 return path
@@ -156,22 +186,31 @@ module flexsoc_debug
                    .JTAG_WRDATA    (jtag_WRDATA)
                    );
 
-    // Debug MUX
+   // PHY clock divider
+   logic                      phy_clk_div;
+   debug_clkdiv 
+     u_clkdiv (
+               .CLKIN   (PHY_CLK),
+               .CLKOUT  (phy_clk_div),
+               .SEL     (clkdiv_o)
+               );
+   
+   // Debug MUX
    debug_mux
      u_debug (
               .CLK           (CLK),
-              .PHY_CLK       (PHY_CLK), // TODO: use clock div
+              .PHY_CLK       (phy_clk_div),
               .RESETn        (RESETn),
-              .JTAGnSWD      (1'b0),  // Replace with CSR
-              .JTAG_DIRECT   (1'b0),  // Replace with CSR
+              .JTAGnSWD      (jtag_n_swd_o),
+              .JTAG_DIRECT   (jtag_direct_o),
               // ADIv5 interface
-              .ADIv5_WRDATA  (),
-              .ADIv5_WREN    (),
-              .ADIv5_WRFULL  (),
-              .ADIv5_RDDATA  (),
-              .ADIv5_RDEN    (),
-              .ADIv5_RDEMPTY (),
-              // ADIv5 interface
+              .ADIv5_WRDATA  ({adiv5_data_o, adiv5_cmd}),
+              .ADIv5_WREN    (adiv5_cmd_stb),
+              .ADIv5_WRFULL  (adiv5_busy),
+              .ADIv5_RDDATA  ({adiv5_data, adiv5_stat}),
+              .ADIv5_RDEN    (adiv5_rden),
+              .ADIv5_RDEMPTY (adiv5_rdempty),
+              // JTAG direct interface
               .JTAG_WRDATA   (jtag_WRDATA),
               .JTAG_WREN     (jtag_WREN),
               .JTAG_WRFULL   (jtag_WRFULL),
