@@ -11,6 +11,7 @@ filesets:
             - uart_fifo
             - fifo_arb
             - ahb3lite_pkg
+            - cdc_utils
         files:
             - rtl/flexsoc_debug.sv
         file_type: verilogSource
@@ -24,6 +25,16 @@ filesets:
             - verilator_utils
         files:
             - bench/tb.cpp : {file_type : cppSource}
+
+    arty_top:
+        files:
+            - rtl/arty_top.sv : {file_type : verilogSource}
+
+    arty_constraints:
+        files:
+            - arty/clocks.xdc : {file_type : xdc}
+            - arty/pins.xdc   : {file_type : xdc}
+            - vivado/vivado.tcl : {file_type : tclSource}
             
 generate:
     flexdbg_csr:
@@ -72,6 +83,7 @@ targets:
             verilator:
                 mode: lint-only
 
+    # Verilator simulation target
     sim:
         <<: *base
         description: Simulate flexsoc_debug
@@ -83,4 +95,15 @@ targets:
                 verilator_options: [-sv, --cc, --trace, --clk, CLK]
                 #make_options: [OPT_FAST=-Ofast]
                 run_options: [--vcd=sim.vcd, --timeout=3000]
+
+    # Arty A35T platform
+    arty:
+        <<: *base
+        description: Synthesize for Arty-A35T
+        default_tool: vivado
+        filesets_append: [arty_top, arty_constraints]
+        toplevel: [arty_top]
+        tools:
+            vivado:
+                part: xc7a35ticsg324-1L
 

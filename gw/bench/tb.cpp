@@ -99,6 +99,7 @@ int main(int argc, char **argv, char **env)
       top->eval();
       top->CLK = !top->CLK;
       top->PHY_CLK = !top->PHY_CLK;
+      top->PHY_CLKn = !top->PHY_CLK;
       top->TRANSPORT_CLK = !top->TRANSPORT_CLK;
       utils->doJTAGClient (top->TCK, &top->TDO, top->TDI, top->TMSOE ? &top->TMSOUT : &top->TMSIN, top->TMSOE);
       if (top->RESETn)

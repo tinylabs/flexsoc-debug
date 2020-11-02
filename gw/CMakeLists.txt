@@ -3,3 +3,4 @@
 #
 
 gw_target( sim )
+gw_target( arty )

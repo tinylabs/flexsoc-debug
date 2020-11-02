@@ -101,7 +101,8 @@ int flexdbg (args_t *args)
 
   // Switch to SWD
   target->Mode (MODE_SWD);
-  
+  printf ("MODE SWD\n");
+
   // Send reset + switch
   target->Reset (1);
 
@@ -127,7 +128,8 @@ int flexdbg (args_t *args)
   
   // Switch to JTAG
   target->Mode (MODE_JTAG);
-  
+  printf ("MODE JTAG\n");
+
   // Send reset + switch
   target->Reset (1);
 

@@ -12,6 +12,7 @@ module flexsoc_debug
    // Clock domains
    input  CLK,
    input  PHY_CLK,
+   input  PHY_CLKn,
    input  TRANSPORT_CLK,
    input  RESETn,
 
@@ -22,11 +23,18 @@ module flexsoc_debug
    // Hardware signals
    output TCK,
    output TDI,
-   input  TDO,
    output TMSOUT,
    output TMSOE,
+   input  TDO,
    input  TMSIN
    );
+
+   // CSR AHB3 slave
+   logic        csr_ahb3_HWRITE, csr_ahb3_HREADY, csr_ahb3_HRESP, csr_ahb3_HSEL, csr_ahb3_HREADYOUT;
+   logic [1:0]  csr_ahb3_HTRANS;
+   logic [2:0]  csr_ahb3_HSIZE, csr_ahb3_HBURST;
+   logic [3:0]  csr_ahb3_HPROT;
+   logic [31:0] csr_ahb3_HADDR, csr_ahb3_HWDATA, csr_ahb3_HRDATA;
 
    // Include autogen CSRs
 `include "flexdbg_csr.vh"   
@@ -55,13 +63,6 @@ module flexsoc_debug
    logic [2:0]  host_ahb3_HSIZE, host_ahb3_HBURST;
    logic [3:0]  host_ahb3_HPROT;
    logic [31:0] host_ahb3_HADDR, host_ahb3_HWDATA, host_ahb3_HRDATA;
-
-   // CSR AHB3 slave
-   logic        csr_ahb3_HWRITE, csr_ahb3_HREADY, csr_ahb3_HRESP, csr_ahb3_HSEL, csr_ahb3_HREADYOUT;
-   logic [1:0]  csr_ahb3_HTRANS;
-   logic [2:0]  csr_ahb3_HSIZE, csr_ahb3_HBURST;
-   logic [3:0]  csr_ahb3_HPROT;
-   logic [31:0] csr_ahb3_HADDR, csr_ahb3_HWDATA, csr_ahb3_HRDATA;
 
    // Bridge AHB3 slave
    logic        bridge_ahb3_HRESP, bridge_ahb3_HSEL, bridge_ahb3_HREADYOUT;
@@ -131,12 +132,36 @@ module flexsoc_debug
 
    // Handle CSRs
    assign flexsoc_id = 32'hf1ecdb61;
+
+   // Generate reset for each clock domain
+   logic SYS_RESETn, TRANSPORT_RESETn, PHY_RESETn;
+   sync2_pgen
+     u_sys_reset (
+                  .c (CLK),
+                  .d (RESETn),
+                  .p (),
+                  .q (SYS_RESETn)
+                  );
+   sync2_pgen
+     u_trn_reset (
+                  .c (TRANSPORT_CLK),
+                  .d (RESETn),
+                  .p (),
+                  .q (TRANSPORT_RESETn)
+                  );
+   sync2_pgen
+     u_phy_reset (
+                  .c (PHY_CLK),
+                  .d (RESETn),
+                  .p (),
+                  .q (PHY_RESETn)
+                  );
    
    // Convert host FIFO to AHB3
    ahb3lite_host_master
      u_host_master (
                     .CLK       (CLK),
-                    .RESETn    (RESETn),
+                    .RESETn    (SYS_RESETn),
                     .HADDR     (host_ahb3_HADDR),
                     .HWDATA    (host_ahb3_HWDATA),
                     .HTRANS    (host_ahb3_HTRANS),
@@ -169,7 +194,7 @@ module flexsoc_debug
    host_jtag_convert
      u_host_jtag_direct (
                    .CLK            (CLK),
-                   .RESETn         (RESETn),
+                   .RESETn         (SYS_RESETn),
                    // FIFO interface with host
                    .HOST_RDEN      (host_jtag_RDEN),
                    .HOST_RDEMPTY   (host_jtag_RDEMPTY),
@@ -187,20 +212,25 @@ module flexsoc_debug
                    );
 
    // PHY clock divider
+   /*
    logic                      phy_clk_div;
    debug_clkdiv 
      u_clkdiv (
                .CLKIN   (PHY_CLK),
+               .CLKINn  (PHY_CLKn),
                .CLKOUT  (phy_clk_div),
                .SEL     (clkdiv_o)
                );
-   
+    */
    // Debug MUX
    debug_mux
      u_debug (
               .CLK           (CLK),
-              .PHY_CLK       (phy_clk_div),
-              .RESETn        (RESETn),
+              //.PHY_CLK       (phy_clk_div),
+              .SYS_RESETn    (SYS_RESETn),
+              .PHY_CLK       (PHY_CLK),
+              .PHY_CLKn      (PHY_CLKn),
+              .PHY_RESETn    (PHY_RESETn),
               .JTAGnSWD      (jtag_n_swd_o),
               .JTAG_DIRECT   (jtag_direct_o),
               // ADIv5 interface
@@ -232,7 +262,7 @@ module flexsoc_debug
               .DW  (8))
    u_fifo_arb (
                .CLK          (CLK),
-               .RESETn       (RESETn),
+               .RESETn       (SYS_RESETn),
                // Connect to dual clock transport fifo
                .com_rden     (arb_RDEN),
                .com_rdempty  (arb_RDEMPTY),
@@ -263,8 +293,8 @@ module flexsoc_debug
    u_tx_fifo (
               .wr_clk_i   (CLK),
               .rd_clk_i   (TRANSPORT_CLK),
-              .rd_rst_i   (~RESETn),
-              .wr_rst_i   (~RESETn),
+              .rd_rst_i   (~TRANSPORT_RESETn),
+              .wr_rst_i   (~SYS_RESETn),
               .wr_en_i    (arb_WREN),
               .wr_data_i  (arb_WRDATA),
               .full_o     (arb_WRFULL),
@@ -280,8 +310,8 @@ module flexsoc_debug
    u_rx_fifo (
               .rd_clk_i   (CLK),
               .wr_clk_i   (TRANSPORT_CLK),
-              .rd_rst_i   (~RESETn),
-              .wr_rst_i   (~RESETn),
+              .rd_rst_i   (~SYS_RESETn),
+              .wr_rst_i   (~TRANSPORT_RESETn),
               .rd_en_i    (arb_RDEN),
               .rd_data_o  (arb_RDDATA),
               .empty_o    (arb_RDEMPTY),
@@ -295,7 +325,7 @@ module flexsoc_debug
    uart_fifo 
      u_uart (
              .CLK        (TRANSPORT_CLK),
-             .RESETn     (RESETn),
+             .RESETn     (TRANSPORT_RESETn),
              // UART interface
              .TX_PIN     (UART_TX),
              .RX_PIN     (UART_RX),
