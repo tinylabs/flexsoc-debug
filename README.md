@@ -2,6 +2,8 @@
 JTAG/SWD debugger implemented via FPGA
 
 ## Dependencies
+- libftdi1  
+  `sudo apt install libftdi1-dev`
 - verilator  
    `sudo apt install verilator`
 - fusesoc  
