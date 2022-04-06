@@ -2,5 +2,5 @@
 # Add hardware targets here
 #
 
-gw_target( sim )
-gw_target( arty )
+fusesoc_gw( sim )
+fusesoc_gw( arty )

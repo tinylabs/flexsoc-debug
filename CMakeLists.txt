@@ -1,9 +1,9 @@
 #
-# flexsoc-cm3 top-level cmake file
+# flexsoc-debug top-level cmake file
 # 
 # All rights reserved.
 # Tiny Labs Inc
-# 2019,2020
+# 2019-2022
 #
 set( CMAKE_VERSION 3.2 )
 cmake_minimum_required( VERSION ${CMAKE_VERSION} )
@@ -11,7 +11,7 @@ cmake_policy( VERSION ${CMAKE_VERSION} )
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 
 # Create project
-project( flexsoc-debug )
+project( flexsoc_debug )
 
 # Enable languages
 enable_language( C CXX ASM )
@@ -21,14 +21,28 @@ if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set( CMAKE_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} CACHE PATH "" FORCE )
 endif()
 
-# Include custom functions
-include( Custom )
+if( DEFINED ENV{XILINX_VIVADO} )
+  message( STATUS "Found Vivado: $ENV{XILINX_VIVADO}" )
+else ()
+  message( STATUS "Vivado not found! Run `source /path/to/vivado/settings64.sh` to synthesize" )
+endif ()
 
 # Make sure verilator is installed
 find_package( verilator REQUIRED )
 
 # Make sure fusesoc is installed
 find_package( fusesoc REQUIRED )
+
+# Cmake fusesoc bindings
+include( fusesoc )
+
+# Add fusesoc libraries
+fusesoc_add_lib( fusesoc-cores https://github.com/fusesoc/fusesoc-cores )
+fusesoc_add_lib( elf-loader https://github.com/fusesoc/elf-loader.git )
+#fusesoc_add_lib( tinylabs-cores https://github.com/tinylabs/tinylabs-cores )
+# Debug with local copy
+fusesoc_add_lib( tinylabs-cores /home/elliot/projects/tinylabs-cores )
+fusesoc_add_lib( ${CMAKE_PROJECT_NAME} ${PROJECT_SOURCE_DIR}/gw )
 
 # Include common defs
 include_directories( common host/flexsoc host/target host/log )

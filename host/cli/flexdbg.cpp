@@ -103,7 +103,7 @@ int flexdbg (args_t *args)
   target->Mode (MODE_SWD);
   printf ("MODE SWD\n");
 
-  // Send reset + switch
+  // Send reset + protocol switch
   target->Reset (1);
 
   // Read IDcode

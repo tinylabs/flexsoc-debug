@@ -15,7 +15,7 @@ add_library( target
 #set_target_properties( target PROPERTIES COMPILE_FLAGS "-O0 -ggdb" )
 
 # Add dependency to generate CSRs
-gen_csr( target )
+fusesoc_gencsr( target flexsoc_debug )
 
 # Link to comm layer
 target_link_libraries( target log flexsoc )
