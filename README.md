@@ -1,6 +1,9 @@
 # flexsoc-debug
 JTAG/SWD debugger implemented via FPGA
 
+## Architecture
+![bd](.images/flexdebug.png)
+
 ## Dependencies
 - libftdi1  
   `sudo apt install libftdi1-dev`
