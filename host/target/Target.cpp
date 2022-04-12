@@ -236,17 +236,11 @@ void Target::Mode (debug_mode_t mode)
 {
   switch (mode) {
     case MODE_SWD:
-      csr->jtag_direct (0);
       csr->jtag_n_swd (0);
       break;
     case MODE_JTAG:
-      csr->jtag_direct (0);
       csr->jtag_n_swd (1);
       break;
-    case MODE_JTAG_DIRECT:
-      csr->jtag_direct (1);
-      csr->jtag_n_swd (1);
-      break;      
   }
 }
 

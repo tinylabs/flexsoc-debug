@@ -41,18 +41,15 @@ module flexsoc_debug
 
    // Import AHB3 constants
    import ahb3lite_pkg::*;
+   import adiv5_pkg::*;
    
    // Dropped bytes due to pipeline backup
    logic [9:0] dropped;
 
-   // Master <=> arbiter
+   // Master <=> FIFO
    wire master_RDEN, master_WREN, master_WRFULL, master_RDEMPTY;
    wire [7:0] master_RDDATA, master_WRDATA;
    
-   // ARB <=> FIFO
-   wire arb_RDEN, arb_WREN, arb_WRFULL, arb_RDEMPTY;
-   wire [7:0] arb_RDDATA, arb_WRDATA;
-
    // FIFO <=> Transport
    wire trans_RDEN, trans_WREN, trans_WRFULL, trans_RDEMPTY;
    wire [7:0] trans_RDDATA, trans_WRDATA;
@@ -67,8 +64,37 @@ module flexsoc_debug
    // Bridge AHB3 slave
    logic        bridge_ahb3_HRESP, bridge_ahb3_HSEL, bridge_ahb3_HREADYOUT;
    logic [31:0] bridge_ahb3_HRDATA;
-   // TODO: Remove after bridge working
-   assign bridge_ahb3_HREADYOUT = 1'b1;
+
+   // CSR compound assignments
+   logic [ADIv5_CMD_WIDTH-1:0] csr_adiv5_wrdata;
+   logic                       csr_adiv5_wren;
+   logic                       csr_adiv5_rden;
+   logic [2:0]                 csr_adiv5_stat;
+                      
+   // Bridge ADIv5 FIFO
+   logic [ADIv5_CMD_WIDTH-1:0]  brg_adiv5_wrdata;
+   logic                        brg_adiv5_wren;
+   logic                        brg_adiv5_wrfull;
+   logic [ADIv5_RESP_WIDTH-1:0] brg_adiv5_rddata;
+   logic                        brg_adiv5_rden;
+   logic                        brg_adiv5_rdempty;
+   // Bridge side channel output for errors
+   logic [2:0]                  brg_adiv5_stat;
+   
+   // ADIv5 mux
+   logic [ADIv5_CMD_WIDTH-1:0]  mux_adiv5_wrdata;
+   logic                        mux_adiv5_wren;
+   logic                        mux_adiv5_wrfull;
+   logic [ADIv5_RESP_WIDTH-1:0] mux_adiv5_rddata;
+   logic                        mux_adiv5_rden;
+   logic                        mux_adiv5_rdempty;
+   
+   // ADIv5 CSR logic
+   logic [31:0]               adiv5_data;
+   logic                      adiv5_ready, adiv5_busy;   
+   logic                      adiv5_rden, adiv5_rdempty;
+   logic [2:0]                adiv5_stat;
+
    
    // Basic routing
    // >= 0xF000.0000 = CSR
@@ -78,12 +104,6 @@ module flexsoc_debug
    assign bridge_ahb3_HSEL = ((host_ahb3_HTRANS == HTRANS_NONSEQ) && (host_ahb3_HADDR < 32'hF000_0000)) ?
                              1 : 0;
 
-   // ADIv5 CSR logic
-   logic [31:0]               adiv5_data;
-   logic                      adiv5_ready, adiv5_busy;   
-   logic                      adiv5_rden, adiv5_rdempty;
-   logic [2:0]                adiv5_stat;
-
    // CSR <=> ADIv5 FIFO interface
    assign adiv5_rden = !adiv5_rdempty & !adiv5_ready;
    assign adiv5_status = {adiv5_stat, adiv5_ready, adiv5_busy};
@@ -91,13 +111,14 @@ module flexsoc_debug
 
    // Feed RW CSRs back
    assign jtag_n_swd_i = jtag_n_swd_o;
-   assign jtag_direct_i = jtag_direct_o;
    assign clkdiv_i = clkdiv_o;
+   assign bridge_en_i = bridge_en_o;
    
    // Assign return path to last selection
    logic        csr_sel;
    always @(posedge CLK)
      begin
+
         // Select peripheral to route back to AHB3 master
         if (csr_ahb3_HSEL)
           csr_sel <= 1;
@@ -115,6 +136,27 @@ module flexsoc_debug
           adiv5_ready <= 0;
      end
 
+   // Connect CSRs to ADIv5 MUX
+   assign csr_adiv5_wrdata = {adiv5_data_o, adiv5_cmd};
+   assign csr_adiv5_wren = adiv5_cmd_stb;
+   assign adiv5_busy = mux_adiv5_wrfull;
+   assign {adiv5_data, csr_adiv5_stat} = mux_adiv5_rddata;
+   assign csr_adiv5_rden = adiv5_rden;
+   assign adiv5_rdempty = mux_adiv5_rdempty;
+
+   // Connect bridge inputs
+   assign brg_adiv5_wrfull = mux_adiv5_wrfull;
+   assign brg_adiv5_rddata = mux_adiv5_rddata;
+   assign brg_adiv5_rdempty = mux_adiv5_rdempty;
+   
+   // Mux bridge and CSR regs
+   assign mux_adiv5_wrdata = bridge_en_o ? brg_adiv5_wrdata : csr_adiv5_wrdata;
+   assign mux_adiv5_wren = bridge_en_o ? brg_adiv5_wren : csr_adiv5_wren;
+   assign mux_adiv5_rden = bridge_en_o ? brg_adiv5_rden : csr_adiv5_rden;
+
+   // Mux stat CSR between bridge and FIFO interface
+   assign adiv5_stat = bridge_en_o ? brg_adiv5_stat : csr_adiv5_stat;
+   
    // AHB3 return path
    assign host_ahb3_HREADY  = csr_sel ? csr_ahb3_HREADYOUT : bridge_ahb3_HREADYOUT;
    assign host_ahb3_HRESP   = csr_sel ? csr_ahb3_HRESP     : bridge_ahb3_HRESP;
@@ -180,51 +222,38 @@ module flexsoc_debug
                     .WRDATA    (master_WRDATA)
                     );
 
-   // Arbiter <=> JTAG
-   wire host_jtag_RDEN, host_jtag_WREN, host_jtag_WRFULL, host_jtag_RDEMPTY;
-   wire [7:0] host_jtag_RDDATA, host_jtag_WRDATA;
+   // AHB3lite debug bridge
+   ahb3lite_debug_bridge
+     u_debug_bridge (
+                     .CLK           (CLK),
+                     .RESETn        (SYS_RESETn),
+                     .ENABLE        (bridge_en_o),
+                     .STAT          (brg_adiv5_stat),
+                     // AHB3 interface
+                     .HSEL          (bridge_ahb3_HSEL),
+                     .HADDR         (host_ahb3_HADDR),
+                     .HWDATA        (host_ahb3_HWDATA),
+                     .HTRANS        (host_ahb3_HTRANS),
+                     .HSIZE         (host_ahb3_HSIZE),
+                     .HBURST        (host_ahb3_HBURST),
+                     .HPROT         (host_ahb3_HPROT),
+                     .HWRITE        (host_ahb3_HWRITE),
+                     .HREADY        (host_ahb3_HREADY),
+                     .HRDATA        (bridge_ahb3_HRDATA),
+                     .HRESP         (bridge_ahb3_HRESP),
+                     .HREADYOUT     (bridge_ahb3_HREADYOUT),
+                     // Debug interface
+                     .ADIv5_WRDATA  (brg_adiv5_wrdata),
+                     .ADIv5_WREN    (brg_adiv5_wren),
+                     .ADIv5_WRFULL  (brg_adiv5_wrfull),
+                     .ADIv5_RDDATA  (brg_adiv5_rddata),
+                     .ADIv5_RDEN    (brg_adiv5_rden),
+                     .ADIv5_RDEMPTY (brg_adiv5_rdempty)
+                     );
 
-   // JTAG <=> DEBUG
-   wire jtag_RDEN, jtag_WREN, jtag_WRFULL, jtag_RDEMPTY;
-   wire [JTAG_CMD_WIDTH-1:0] jtag_WRDATA;
-   wire [JTAG_RESP_WIDTH-1:0] jtag_RDDATA;
-   
-   // Decapsulate channel B and pass to JTAG interface
-   // Encapsulate result and pass to HOST
-   host_jtag_convert
-     u_host_jtag_direct (
-                   .CLK            (CLK),
-                   .RESETn         (SYS_RESETn),
-                   // FIFO interface with host
-                   .HOST_RDEN      (host_jtag_RDEN),
-                   .HOST_RDEMPTY   (host_jtag_RDEMPTY),
-                   .HOST_WREN      (host_jtag_WREN),
-                   .HOST_WRFULL    (host_jtag_WRFULL),
-                   .HOST_RDDATA    (host_jtag_RDDATA),
-                   .HOST_WRDATA    (host_jtag_WRDATA),
-                   // Direct FIFO interface
-                   .JTAG_RDEN      (jtag_RDEN),
-                   .JTAG_RDEMPTY   (jtag_RDEMPTY),
-                   .JTAG_WREN      (jtag_WREN),
-                   .JTAG_WRFULL    (jtag_WRFULL),
-                   .JTAG_RDDATA    (jtag_RDDATA),
-                   .JTAG_WRDATA    (jtag_WRDATA)
-                   );
-
-   // PHY clock divider
-   /*
-   logic                      phy_clk_div;
-   debug_clkdiv 
-     u_clkdiv (
-               .CLKIN   (PHY_CLK),
-               .CLKINn  (PHY_CLKn),
-               .CLKOUT  (phy_clk_div),
-               .SEL     (clkdiv_o)
-               );
-    */
    // Debug MUX
-   debug_mux
-     u_debug (
+   adiv5_mux
+     u_adiv5_mux (
               .CLK           (CLK),
               //.PHY_CLK       (phy_clk_div),
               .SYS_RESETn    (SYS_RESETn),
@@ -232,21 +261,13 @@ module flexsoc_debug
               .PHY_CLKn      (PHY_CLKn),
               .PHY_RESETn    (PHY_RESETn),
               .JTAGnSWD      (jtag_n_swd_o),
-              .JTAG_DIRECT   (jtag_direct_o),
               // ADIv5 interface
-              .ADIv5_WRDATA  ({adiv5_data_o, adiv5_cmd}),
-              .ADIv5_WREN    (adiv5_cmd_stb),
-              .ADIv5_WRFULL  (adiv5_busy),
-              .ADIv5_RDDATA  ({adiv5_data, adiv5_stat}),
-              .ADIv5_RDEN    (adiv5_rden),
-              .ADIv5_RDEMPTY (adiv5_rdempty),
-              // JTAG direct interface
-              .JTAG_WRDATA   (jtag_WRDATA),
-              .JTAG_WREN     (jtag_WREN),
-              .JTAG_WRFULL   (jtag_WRFULL),
-              .JTAG_RDDATA   (jtag_RDDATA),
-              .JTAG_RDEN     (jtag_RDEN),
-              .JTAG_RDEMPTY  (jtag_RDEMPTY),
+              .ADIv5_WRDATA  (mux_adiv5_wrdata),
+              .ADIv5_WREN    (mux_adiv5_wren),
+              .ADIv5_WRFULL  (mux_adiv5_wrfull),
+              .ADIv5_RDDATA  (mux_adiv5_rddata),
+              .ADIv5_RDEN    (mux_adiv5_rden),
+              .ADIv5_RDEMPTY (mux_adiv5_rdempty),
               // PHY signals
               .TCK           (TCK),
               .TDI           (TDI),
@@ -256,37 +277,7 @@ module flexsoc_debug
               .TMSIN         (TMSIN)
               );
    
-   // Create fifo arbiter to share connection with host
-   fifo_arb #(
-              .AW  (4),
-              .DW  (8))
-   u_fifo_arb (
-               .CLK          (CLK),
-               .RESETn       (SYS_RESETn),
-               // Connect to dual clock transport fifo
-               .com_rden     (arb_RDEN),
-               .com_rdempty  (arb_RDEMPTY),
-               .com_rddata   (arb_RDDATA),
-               .com_wren     (arb_WREN),
-               .com_wrfull   (arb_WRFULL),
-               .com_wrdata   (arb_WRDATA),
-               // Connect to host_master (selmask matches)
-               .c1_rden      (master_RDEN),
-               .c1_rdempty   (master_RDEMPTY),
-               .c1_rddata    (master_RDDATA),
-               .c1_wren      (master_WREN),
-               .c1_wrfull    (master_WRFULL),
-               .c1_wrdata    (master_WRDATA),
-               // Connect to JTAG direct IF
-               .c2_rden      (host_jtag_RDEN),
-               .c2_rdempty   (host_jtag_RDEMPTY),
-               .c2_rddata    (host_jtag_RDDATA),
-               .c2_wren      (host_jtag_WREN),
-               .c2_wrfull    (host_jtag_WRFULL),
-               .c2_wrdata    (host_jtag_WRDATA)
-               );
-   
-   // Arb => Transport
+   // AHB3-master => Transport
    dual_clock_fifo #(
                      .ADDR_WIDTH   (8),
                      .DATA_WIDTH   (8))
@@ -295,15 +286,15 @@ module flexsoc_debug
               .rd_clk_i   (TRANSPORT_CLK),
               .rd_rst_i   (~TRANSPORT_RESETn),
               .wr_rst_i   (~SYS_RESETn),
-              .wr_en_i    (arb_WREN),
-              .wr_data_i  (arb_WRDATA),
-              .full_o     (arb_WRFULL),
+              .wr_en_i    (master_WREN),
+              .wr_data_i  (master_WRDATA),
+              .full_o     (master_WRFULL),
               .rd_en_i    (trans_RDEN),
               .rd_data_o  (trans_RDDATA),
               .empty_o    (trans_RDEMPTY)
               );
 
-   // Transport => Arb
+   // Transport => AHB3-master
    dual_clock_fifo #(
                      .ADDR_WIDTH   (8),
                      .DATA_WIDTH   (8))
@@ -312,9 +303,9 @@ module flexsoc_debug
               .wr_clk_i   (TRANSPORT_CLK),
               .rd_rst_i   (~SYS_RESETn),
               .wr_rst_i   (~TRANSPORT_RESETn),
-              .rd_en_i    (arb_RDEN),
-              .rd_data_o  (arb_RDDATA),
-              .empty_o    (arb_RDEMPTY),
+              .rd_en_i    (master_RDEN),
+              .rd_data_o  (master_RDDATA),
+              .empty_o    (master_RDEMPTY),
               .wr_en_i    (trans_WREN),
               .wr_data_i  (trans_WRDATA),
               .full_o     (trans_WRFULL)
