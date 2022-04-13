@@ -57,7 +57,7 @@ add_subdirectory( host )
 add_subdirectory( gw )
 
 # Add tests
-#add_subdirectory( test )
+add_subdirectory( test )
 
 # Get version from git
 execute_process(COMMAND git log --pretty=format:%h -n 1
