@@ -224,11 +224,11 @@ adiv5_stat_t Target::ReadAP (uint8_t ap, uint8_t addr, uint32_t *data)
 const char *Target::ADIv5_Stat (adiv5_stat_t code)
 {
   switch (code) {
-    case ADIv5_OK: return "OK";
-    case ADIv5_TIMEOUT: return "ADIv5_TIMEOUT";
-    case ADIv5_FAULT: return "ADIv5_FAULT";
+    case ADIv5_OK:        return "OK";
+    case ADIv5_TIMEOUT:   return "ADIv5_TIMEOUT";
+    case ADIv5_FAULT:     return "ADIv5_FAULT";
     case ADIv5_NOCONNECT: return "ADIv5_NOCONNECT";
-    default: return "UNKNOWN ERROR";
+    default:              return "UNKNOWN ERROR";
   }
 }
 

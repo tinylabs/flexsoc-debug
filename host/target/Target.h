@@ -26,8 +26,8 @@ typedef enum {
 
 // Modes of operation
 typedef enum {
-              MODE_SWD         = 0,
-              MODE_JTAG        = 1
+              MODE_SWD        = 0,
+              MODE_JTAG       = 1
 } debug_mode_t;
 
 class Target {
