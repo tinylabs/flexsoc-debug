@@ -16,6 +16,7 @@ fusesoc_ext_gw( cm3_min_soc sim )
 test_setup ()
 
 # Add tests
+add_subdirectory( api )
 
 # Finalize testing
 test_finalize ()

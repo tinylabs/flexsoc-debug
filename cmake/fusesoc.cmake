@@ -82,18 +82,10 @@ macro( test_finalize )
 endmacro( test_finalize )
 
 # Create test
-function( hw_test NAME SOURCES)
+function( fusesoc_api_test NAME SOURCES)
   add_executable( ${NAME} ${SOURCES} ${ARGN} )
-  target_link_libraries( ${NAME} flexsoc target test )
+  target_link_libraries( ${NAME} flexsoc target )
   add_test(
     NAME ${NAME}
-    COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/hw_test.sh ${VERILATOR_SIM} $<TARGET_FILE:${NAME}> ${FLEXSOC_HW} )    
-endfunction( hw_test )
-
-# Create CLI tests
-function( cli_test NAME SYSMAP BINARY EXT )
-  add_test(
-    NAME ${NAME}
-    COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/cli_test.sh ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/test/map/${SYSMAP} ${PROJECT_SOURCE_DIR}/test/arm/bin/${BINARY} ${FLEXSOC_HW} ${EXT} ${VERILATOR_SIM}
-    )
-endfunction( cli_test )
+    COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/api_test.sh ${VERILATOR_SIM} ${REMOTE_SIM} $<TARGET_FILE:${NAME}> ${FLEXSOC_HW} false ) # Set to true to trace   
+endfunction( fusesoc_api_test )
