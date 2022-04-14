@@ -9,14 +9,6 @@ macro( fusesoc_gw NAME )
     )
 endmacro( fusesoc_gw )
 
-macro( fusesoc_ext_gw PROJECT NAME )
-  add_custom_target( ${PROJECT}-${NAME}
-    COMMENT "Generating gateware for ${PROJECT}-${NAME}..."
-    COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf --log-file /dev/null run --target=${NAME} ${PROJECT}
-    BYPRODUCTS ${PROJECT_BINARY_DIR}/test/build/${PROJECT}_0.1/sim-verilator/V${PROJECT}
-    )
-endmacro( fusesoc_ext_gw )
-
 function( fusesoc_gencsr TARGET GW_TOP )
   add_custom_command(
     COMMENT "Generating CSR definitions"
@@ -64,6 +56,11 @@ macro( test_setup )
       COMMENT "Generating verilated sim for ${CMAKE_PROJECT_NAME}"
       COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf run --target=sim ${CMAKE_PROJECT_NAME}
       )
+    add_custom_command(
+      OUTPUT ${REMOTE_SIM}
+      COMMENT "Generating verilated sim for remote target"
+      COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf run --target=sim cm3_min_soc
+      )
   endif ()
   # Turn on testing
   enable_testing()
@@ -75,8 +72,7 @@ macro( test_finalize )
       COMMAND ${CMAKE_CTEST_COMMAND} )
   else ()
     add_custom_target( check
-      DEPENDS ${VERILATOR_SIM}
-      DEPENDS ${REMOTE_SIM}
+      DEPENDS ${VERILATOR_SIM} ${REMOTE_SIM}
       COMMAND ${CMAKE_CTEST_COMMAND} )
   endif ()
 endmacro( test_finalize )

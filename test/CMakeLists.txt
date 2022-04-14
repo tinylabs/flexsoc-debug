@@ -9,9 +9,6 @@
 # remote SoC (cm3_min_soc).
 #
 
-# Bring in external SoC implementation to connect to
-fusesoc_ext_gw( cm3_min_soc sim )
-
 # Setup test framework
 test_setup ()
 

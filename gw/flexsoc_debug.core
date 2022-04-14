@@ -94,7 +94,7 @@ targets:
             verilator:
                 verilator_options: [-sv, --cc, --trace, --clk, CLK]
                 #make_options: [OPT_FAST=-Ofast]
-                run_options: [--vcd=sim.vcd, --timeout=3000]
+                run_options: [--timeout=1]
 
     # Arty A35T platform
     arty:
