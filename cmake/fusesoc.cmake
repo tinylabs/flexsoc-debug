@@ -5,14 +5,14 @@
 macro( fusesoc_gw NAME )
   add_custom_target( ${NAME}
     COMMENT "Generating gateware for ${NAME}..."
-    COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf run --target=${NAME} ${CMAKE_PROJECT_NAME}
+    COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf --log-file /dev/null run --target=${NAME} ${CMAKE_PROJECT_NAME}
     )
 endmacro( fusesoc_gw )
 
 macro( fusesoc_ext_gw PROJECT NAME )
   add_custom_target( ${PROJECT}-${NAME}
     COMMENT "Generating gateware for ${PROJECT}-${NAME}..."
-    COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf run --target=${NAME} ${PROJECT}
+    COMMAND ${FUSESOC_EXECUTABLE} --config ${PROJECT_BINARY_DIR}/fusesoc.conf --log-file /dev/null run --target=${NAME} ${PROJECT}
     BYPRODUCTS ${PROJECT_BINARY_DIR}/test/build/${PROJECT}_0.1/sim-verilator/V${PROJECT}
     )
 endmacro( fusesoc_ext_gw )

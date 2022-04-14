@@ -22,12 +22,11 @@ function ctrl_c() {
 }
 
 # Running on read hardware
-if [ $# -eq 3 ]; then
+if [ $# -eq 2 ]; then
 
     # Get test and hardware
     EXE=$1
     HW=$2
-    TRACE=$3
 # Running on sim
 elif [ $# -eq 5 ]; then
     # Get local SIM and remote SIM
@@ -67,13 +66,18 @@ if [ -n "$SIM" ]; then
         $SIM -u$PORT -r &
     fi
     SIM_PID=$!
-    sleep 0.5
+    sleep 1
 fi
 
 # Run test
 $EXE $HW
 RV=$?
 echo "Result=" $RV
+
+# Sleep for a second to allow flushing of traces
+if [ "$TRACE" = true ]; then
+    sleep 1
+fi
 
 # Kill sim instances
 ctrl_c
