@@ -71,7 +71,7 @@ private:
   adiv5_stat_t ReadDP (uint8_t addr, uint32_t *data);
   adiv5_stat_t WriteAP (uint8_t ap, uint8_t addr, uint32_t data);
   adiv5_stat_t ReadAP (uint8_t ap, uint8_t addr, uint32_t *data);
-  void Reset (bool pswitch);
+  uint32_t Reset (bool pswitch);
   const char *ADIv5_Stat (adiv5_stat_t code);
   
   // Access CSRs

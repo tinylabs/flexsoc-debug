@@ -49,11 +49,11 @@ generate:
                 jtag_n_swd:
                     width: 1
                     type: rw
-                clkdiv:
-                    width: 4
-                    type: rw
                 bridge_en:
                     width: 1
+                    type: rw
+                apsel:
+                    width: 8
                     type: rw
                 # ADIv5 interface
                 adiv5_cmd:

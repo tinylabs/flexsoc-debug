@@ -12,9 +12,6 @@
 int main (int argc, char **argv)
 {
   uint32_t val;
-  adiv5_stat_t stat;
-
-  log_init (LOG_NORMAL);
   
   // Connect to target
   Target *target = Target::Ptr (argv[1]);
@@ -33,6 +30,9 @@ int main (int argc, char **argv)
   assert (target->ReadDP (0, &val) == ADIv5_OK);
   assert (val == 0x2BA01477);
 
+  // Close device
+  delete target;
+  
   // Success
   return 0;
 }

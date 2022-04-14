@@ -30,6 +30,9 @@ int main (int argc, char **argv)
   assert (target->ReadDP (0, &val) == ADIv5_OK);
   assert (val == 0x4BA00477);
 
+  // Close device
+  delete target;
+  
   // Success
   return 0;
 }

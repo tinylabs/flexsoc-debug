@@ -23,6 +23,9 @@ int main (int argc, char **argv)
   // Read device ID
   devid = target->FlexsocID ();
   assert ((devid >> 4) == 0xF1ecdb6);
+
+  // Close device
+  delete target;
   
   // Success
   return 0;

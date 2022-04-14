@@ -111,8 +111,8 @@ module flexsoc_debug
 
    // Feed RW CSRs back
    assign jtag_n_swd_i = jtag_n_swd_o;
-   assign clkdiv_i = clkdiv_o;
    assign bridge_en_i = bridge_en_o;
+   assign apsel_i = apsel_o;
    
    // Assign return path to last selection
    logic        csr_sel;
@@ -229,6 +229,7 @@ module flexsoc_debug
                      .RESETn        (SYS_RESETn),
                      .ENABLE        (bridge_en_o),
                      .STAT          (brg_adiv5_stat),
+                     .APSEL         (apsel_o),
                      // AHB3 interface
                      .HSEL          (bridge_ahb3_HSEL),
                      .HADDR         (host_ahb3_HADDR),

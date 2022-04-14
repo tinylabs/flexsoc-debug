@@ -109,13 +109,19 @@ uint32_t Target::FlexsocID (void)
   return csr->flexsoc_id ();
 }
 
-void Target::Reset (bool pswitch)
+uint32_t Target::Reset (bool pswitch)
 {
+  uint32_t val;
+  
   // DP[0xc] is used as a pseudo register to allow
   // protocol specific RESET/PROTOCOL SWITCHING
   WriteDP (0xc, 0);
   if (pswitch)
     WriteDP (0xc, 1);
+
+  // Must read IDR on reset
+  this->ReadDP (0, &val);
+  return val;
 }
 
 adiv5_stat_t Target::WriteDP (uint8_t addr, uint32_t data)
