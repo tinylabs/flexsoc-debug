@@ -1,0 +1,102 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Apr 15 19:22:28 2022
+[*]
+[dumpfile] "/home/elliot/projects/flexsoc-debug/build/test/api/test-jtag-mem-bridge.vcd"
+[dumpfile_mtime] "Fri Apr 15 19:16:22 2022"
+[dumpfile_size] 83955164
+[savefile] "/home/elliot/projects/flexsoc-debug/test/gtkwave/debug_bridge.gtkw"
+[timestart] 1731082
+[size] 2560 1403
+[pos] -1 -1
+*-9.000000 1732051 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.flexsoc_debug.
+[treeopen] TOP.flexsoc_debug.u_debug_bridge.
+[sst_width] 221
+[signals_width] 273
+[sst_expanded] 1
+[sst_vpaned_height] 423
+@28
+TOP.CLK
+TOP.PHY_CLK
+TOP.PHY_CLKn
+TOP.TRANSPORT_CLK
+TOP.RESETn
+TOP.TCK
+TOP.TDI
+TOP.TDO
+TOP.TMSIN
+TOP.TMSOE
+TOP.TMSOUT
+TOP.UART_RX
+TOP.UART_TX
+@200
+-
+@28
+TOP.flexsoc_debug.u_debug_bridge.ENABLE
+@22
+TOP.flexsoc_debug.u_debug_bridge.APSEL[7:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.RESETn
+TOP.flexsoc_debug.u_debug_bridge.STAT[2:0]
+@200
+-
+@28
+[color] 2
+TOP.flexsoc_debug.u_debug_bridge.HSEL
+[color] 2
+TOP.flexsoc_debug.u_debug_bridge.HREADYOUT
+@29
+TOP.flexsoc_debug.u_debug_bridge.HRESP
+@22
+TOP.flexsoc_debug.u_debug_bridge.HADDR[31:0]
+TOP.flexsoc_debug.u_debug_bridge.HRDATA[31:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.HSIZE[2:0]
+@22
+TOP.flexsoc_debug.u_debug_bridge.HWDATA[31:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.HWRITE
+@200
+-
+@22
+TOP.flexsoc_debug.u_debug_bridge.ahb_addr[31:0]
+TOP.flexsoc_debug.u_debug_bridge.ahb_bd[3:0]
+TOP.flexsoc_debug.u_debug_bridge.ahb_data[31:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.ahb_latch_data
+TOP.flexsoc_debug.u_debug_bridge.ahb_pending
+TOP.flexsoc_debug.u_debug_bridge.ahb_req_sz[2:0]
+TOP.flexsoc_debug.u_debug_bridge.ahb_wnr
+@200
+-
+@24
+TOP.flexsoc_debug.u_debug_bridge.state[3:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.check_resp
+TOP.flexsoc_debug.u_debug_bridge.cmd_complete
+@22
+TOP.flexsoc_debug.u_debug_bridge.resp[34:0]
+TOP.flexsoc_debug.u_debug_bridge.csw[31:0]
+TOP.flexsoc_debug.u_debug_bridge.sel[31:0]
+TOP.flexsoc_debug.u_debug_bridge.tar[31:0]
+@200
+-
+@24
+TOP.flexsoc_debug.u_debug_bridge.resp_pending[2:0]
+TOP.flexsoc_debug.u_debug_bridge.resp_recvd[2:0]
+@200
+-
+@28
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_RDEMPTY
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_RDEN
+@22
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_RDDATA[34:0]
+@28
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_WRFULL
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_WREN
+@22
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_WRDATA[35:0]
+[pattern_trace] 1
+[pattern_trace] 0

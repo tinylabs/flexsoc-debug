@@ -58,9 +58,9 @@ module arty_top
                 .BANDWIDTH ("OPTIMIZED"),
                 .CLKFBOUT_MULT (10),
                 .CLKFBOUT_PHASE(0.0),    // Phase offset in degrees of CLKFB, (-360-360)
-                .CLKOUT0_DIVIDE (5),     // 200MHz
-                .CLKOUT1_DIVIDE (5),     // 200MHz
-                .CLKOUT2_DIVIDE (5),     // 200MHz
+                .CLKOUT0_DIVIDE (10),    // 100MHz - sysclk
+                .CLKOUT1_DIVIDE (5),     // 200MHz - phyclk
+                .CLKOUT2_DIVIDE (5),     // 200MHz - phyclk
                 .CLKIN1_PERIOD(10.0),    // 100MHz input clock
                 .CLKOUT0_DUTY_CYCLE(0.5),
                 .CLKOUT0_PHASE(0.0),
