@@ -21,8 +21,8 @@ int main (int argc, char **argv)
   // Validate CRC of CSR
   assert (target->Validate () == 0);
 
-  // Set mode to JTAG
-  target->Mode (MODE_JTAG);
+  // Set phy to JTAG
+  target->SetPhy (PHY_JTAG);
 
   // Send reset + protocol switch
   target->Reset (0);

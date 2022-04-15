@@ -238,19 +238,25 @@ const char *Target::ADIv5_Stat (adiv5_stat_t code)
   }
 }
 
-void Target::Mode (debug_mode_t mode)
+void Target::SetPhy (phy_t phy)
 {
-  switch (mode) {
-    case MODE_SWD:
+  switch (phy) {
+    case PHY_SWD:
       csr->jtag_n_swd (0);
       break;
-    case MODE_JTAG:
+    case PHY_JTAG:
       csr->jtag_n_swd (1);
       break;
   }
 }
 
-void Target::ClkDiv (uint8_t div)
+void Target::BridgeAPSel (uint8_t ap)
 {
-  csr->clkdiv (div & 0xf);
+  csr->apsel (ap);
 }
+
+void Target::BridgeEn (bool enabled)
+{
+  csr->bridge_en (enabled);
+}
+

@@ -20,8 +20,8 @@ int main (int argc, char **argv)
   // Validate CRC of CSR
   assert (target->Validate () == 0);
 
-  // Set mode to JTAG
-  target->Mode (MODE_SWD);
+  // Set phy to SWD
+  target->SetPhy (PHY_SWD);
 
   // Send reset + protocol switch
   target->Reset (1);

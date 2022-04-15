@@ -49,7 +49,7 @@ int main (int argc, char **argv)
   assert (target->Validate () == 0);
 
   // Set mode to JTAG
-  target->Mode (MODE_JTAG);
+  target->SetPhy (PHY_JTAG);
 
   // Send reset + protocol switch
   target->Reset (0);

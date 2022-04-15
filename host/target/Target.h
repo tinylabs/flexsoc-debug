@@ -24,11 +24,11 @@ typedef enum {
               
 } adiv5_stat_t;
 
-// Modes of operation
+// Physical interfaces
 typedef enum {
-              MODE_SWD        = 0,
-              MODE_JTAG       = 1
-} debug_mode_t;
+              PHY_SWD        = 0,
+              PHY_JTAG       = 1
+} phy_t;
 
 class Target {
 
@@ -61,10 +61,13 @@ private:
   void WriteReg (uint32_t addr, uint32_t val);
 
   // Switch modes
-  void Mode (debug_mode_t mode);
+  void SetPhy (phy_t phy);
 
-  // Set PHY clkdiv
-  void ClkDiv (uint8_t div);
+  // Select AP for bridge mode
+  void BridgeAPSel (uint8_t ap);
+
+  // Enable bridge
+  void BridgeEn (bool enabled);
   
   // Read/Write ADIv5
   adiv5_stat_t WriteDP (uint8_t addr, uint32_t data);

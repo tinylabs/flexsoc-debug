@@ -10,7 +10,6 @@
 
 #include "Target.h"
 #include "flexsoc.h"
-#include "remote.h"
 #include "log.h"
 
 #include <signal.h>
@@ -99,6 +98,7 @@ int flexdbg (args_t *args)
   // Register handler for shutdown
   signal (SIGINT, &shutdown);
 
+  /*
   // Switch to SWD
   target->Mode (MODE_SWD);
   printf ("MODE SWD\n");
@@ -149,7 +149,8 @@ int flexdbg (args_t *args)
   // Read AP[0] IDR
   stat = target->ReadAP (0, 0xfc, &val);
   printf ("%08X %s\n", val, target->ADIv5_Stat (stat));
-
+  */
+  
   // Close device
   delete target;
 
