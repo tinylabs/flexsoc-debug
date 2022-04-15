@@ -38,12 +38,27 @@ int main (int argc, char **argv)
   }
 
   // Check for ACK
-  assert ((val & 0xF0000000) == 0xF0000000);
-
+  assert (i != 10);
+  
   // Now we can access MEM-AP
   // Read MEMAP-IDR
   assert (target->ReadAP (0, 0xfc, &val) == ADIv5_OK);
   assert (val == 0x24770011);
+
+  // Write test data for BD0 read
+  assert (target->WriteAP (0, 4, 0x20000000) == ADIv5_OK);
+  assert (target->WriteAP (0, 0, 0xA3000002) == ADIv5_OK);
+  assert (target->WriteAP (0, 0xc, 0x11223344) == ADIv5_OK);
+  
+  // Read from each AP bank
+  assert (target->ReadAP (0, 0xe0, &val) == ADIv5_OK);
+  assert (val == 0);
+  assert (target->ReadAP (0, 0x30, &val) == ADIv5_OK);
+  assert (val == 0);
+  assert (target->ReadAP (0, 0x10, &val) == ADIv5_OK);
+  assert (val == 0x11223344);
+  assert (target->ReadAP (0, 0x00, &val) == ADIv5_OK);
+  assert (val == 0x23000042);
 
   // Close device
   delete target;

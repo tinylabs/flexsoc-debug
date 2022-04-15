@@ -199,11 +199,11 @@ int main (int argc, char **argv)
   // Validate CRC of CSR
   assert (target->Validate () == 0);
 
-  // Set mode to JTAG
-  target->SetPhy (PHY_JTAG);
+  // Set phy to SWD
+  target->SetPhy (PHY_SWD);
 
   // Send reset + protocol switch
-  target->Reset (0);
+  target->Reset (1);
 
   // Enable debug for AP access
   assert (target->WriteDP (4, 0x50000000) == ADIv5_OK);

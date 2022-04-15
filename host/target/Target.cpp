@@ -154,7 +154,7 @@ adiv5_stat_t Target::ReadDP (uint8_t addr, uint32_t *data)
 {
   uint32_t stat;
 
-  // Write command
+  // Read command
   csr->adiv5_cmd ((addr & 0xc) | 1);
 
   // Wait until command completes
@@ -178,8 +178,8 @@ adiv5_stat_t Target::WriteAP (uint8_t ap, uint8_t addr, uint32_t data)
   uint32_t stat;
   adiv5_stat_t rv;
   
-  // Write DP[select]
-  rv = WriteDP (8, (ap << 24) | addr);
+  // Write DP[select] - apbank
+  rv = WriteDP (8, (ap << 24) | (addr & 0xF0));
   if (rv != ADIv5_OK)
     return rv;
 
@@ -203,8 +203,8 @@ adiv5_stat_t Target::ReadAP (uint8_t ap, uint8_t addr, uint32_t *data)
   uint32_t stat;
   adiv5_stat_t rv;
   
-  // Write DP[select]
-  rv = WriteDP (8, (ap << 24) | addr);
+  // Write DP[select] - apbank
+  rv = WriteDP (8, (ap << 24) | (addr & 0xF0));
   if (rv != ADIv5_OK)
     return rv;
 
