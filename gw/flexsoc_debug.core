@@ -55,6 +55,9 @@ generate:
                 apsel:
                     width: 8
                     type: rw
+                seq:
+                    width: 1
+                    type: rw
                 # ADIv5 interface
                 adiv5_cmd:
                     width: 4

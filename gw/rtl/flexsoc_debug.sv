@@ -113,6 +113,7 @@ module flexsoc_debug
    assign jtag_n_swd_i = jtag_n_swd_o;
    assign bridge_en_i = bridge_en_o;
    assign apsel_i = apsel_o;
+   assign seq_i = seq_o;
    
    // Assign return path to last selection
    logic        csr_sel;
@@ -230,6 +231,7 @@ module flexsoc_debug
                      .ENABLE        (bridge_en_o),
                      .STAT          (brg_adiv5_stat),
                      .APSEL         (apsel_o),
+                     .SEQ           (seq_o),
                      // AHB3 interface
                      .HSEL          (bridge_ahb3_HSEL),
                      .HADDR         (host_ahb3_HADDR),

@@ -30,6 +30,12 @@ typedef enum {
               PHY_JTAG       = 1
 } phy_t;
 
+// Bridge modes
+typedef enum {
+  MODE_NORMAL = 0,
+  MODE_SEQUENTIAL = 1
+} brg_mode_t;
+
 class Target {
 
   static Target *inst;
@@ -63,11 +69,14 @@ private:
   // Switch modes
   void SetPhy (phy_t phy);
 
+  // Enable bridge
+  void BridgeEn (bool enabled);
+
   // Select AP for bridge mode
   void BridgeAPSel (uint8_t ap);
 
-  // Enable bridge
-  void BridgeEn (bool enabled);
+  // Setup bridge mode
+  void BridgeMode (brg_mode_t mode);
   
   // Read/Write ADIv5
   adiv5_stat_t WriteDP (uint8_t addr, uint32_t data);

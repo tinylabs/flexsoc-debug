@@ -260,3 +260,14 @@ void Target::BridgeEn (bool enabled)
   csr->bridge_en (enabled);
 }
 
+void Target::BridgeMode (brg_mode_t mode)
+{
+  switch (mode) {
+    case MODE_NORMAL:
+      csr->seq (0);
+      break;
+    case MODE_SEQUENTIAL:
+      csr->seq (1);
+      break;
+  }
+}
