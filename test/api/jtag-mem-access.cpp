@@ -16,7 +16,7 @@ void mem_byte_rw (Target *target)
   uint32_t val;
   
   // Setup CSR - byte, no autoinc
-  assert (target->WriteAP (0, 0, 0xA2000010) == ADIv5_OK);
+  assert (target->WriteAP (0, 0, 0xA2000000) == ADIv5_OK);
 
   // Write 4 bytes using DRW
   assert (target->WriteAP (0, 4, 0x20000000) == ADIv5_OK);
@@ -76,7 +76,7 @@ void mem_hwrd_rw (Target *target)
   uint32_t val;
   
   // Setup CSR - hwrd, no autoinc
-  assert (target->WriteAP (0, 0, 0xA2000011) == ADIv5_OK);
+  assert (target->WriteAP (0, 0, 0xA2000001) == ADIv5_OK);
 
   // Write 4 hwrd using DRW
   assert (target->WriteAP (0, 4, 0x20000000) == ADIv5_OK);

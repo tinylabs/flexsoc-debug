@@ -14,8 +14,8 @@
 #include "log.h"
 
 // Global buffers
-static uint32_t data[256];
-static uint32_t verify[256];
+static uint32_t data[16];
+static uint32_t verify[16];
 
 void test_word (Target *target, uint32_t *data, size_t len)
 {
@@ -64,7 +64,7 @@ void test_word_autoinc (Target *target, uint32_t *data, size_t len)
     assert (0);
 
   // Disable bridge
-  target->BridgeEn (false);  
+  target->BridgeEn (false);
 }
 
 void test_hwrd (Target *target, uint16_t *data, size_t len)

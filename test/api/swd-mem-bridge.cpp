@@ -14,8 +14,8 @@
 #include "log.h"
 
 // Global buffers
-static uint32_t data[256];
-static uint32_t verify[256];
+static uint32_t data[16];
+static uint32_t verify[16];
 
 void test_word (Target *target, uint32_t *data, size_t len)
 {

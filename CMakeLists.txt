@@ -10,11 +10,20 @@ cmake_minimum_required( VERSION ${CMAKE_VERSION} )
 cmake_policy( VERSION ${CMAKE_VERSION} )
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 
+# Setup ARM toolchain
+set( CMAKE_TOOLCHAIN_FILE ARM-Toolchain )
+
 # Create project
 project( flexsoc_debug )
 
 # Enable languages
 enable_language( C CXX ASM )
+
+# Cross-compile and stop if building target source
+if( BUILD_ARM )
+  add_subdirectory( test/irq/arm )
+  return ()
+endif( BUILD_ARM )
 
 # Set install if not set
 if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )

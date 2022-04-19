@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Fri Apr 15 19:22:28 2022
+[*] Mon Apr 18 17:52:14 2022
 [*]
 [dumpfile] "/home/elliot/projects/flexsoc-debug/build/test/api/test-jtag-mem-bridge.vcd"
-[dumpfile_mtime] "Fri Apr 15 19:16:22 2022"
-[dumpfile_size] 83955164
+[dumpfile_mtime] "Mon Apr 18 17:50:42 2022"
+[dumpfile_size] 61542749
 [savefile] "/home/elliot/projects/flexsoc-debug/test/gtkwave/debug_bridge.gtkw"
-[timestart] 1731082
+[timestart] 1822260
 [size] 2560 1403
 [pos] -1 -1
-*-9.000000 1732051 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-14.000000 1877880 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.flexsoc_debug.
 [treeopen] TOP.flexsoc_debug.u_debug_bridge.
@@ -26,9 +26,14 @@ TOP.RESETn
 TOP.TCK
 TOP.TDI
 TOP.TDO
+@29
+TOP.TMSOUT
+@28
 TOP.TMSIN
 TOP.TMSOE
-TOP.TMSOUT
+@200
+-
+@28
 TOP.UART_RX
 TOP.UART_TX
 @200
@@ -40,6 +45,7 @@ TOP.flexsoc_debug.u_debug_bridge.APSEL[7:0]
 @28
 TOP.flexsoc_debug.u_debug_bridge.RESETn
 TOP.flexsoc_debug.u_debug_bridge.STAT[2:0]
+TOP.flexsoc_debug.u_debug_bridge.SEQ
 @200
 -
 @28
@@ -47,7 +53,6 @@ TOP.flexsoc_debug.u_debug_bridge.STAT[2:0]
 TOP.flexsoc_debug.u_debug_bridge.HSEL
 [color] 2
 TOP.flexsoc_debug.u_debug_bridge.HREADYOUT
-@29
 TOP.flexsoc_debug.u_debug_bridge.HRESP
 @22
 TOP.flexsoc_debug.u_debug_bridge.HADDR[31:0]

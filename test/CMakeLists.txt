@@ -15,5 +15,8 @@ test_setup ()
 # Add tests
 add_subdirectory( api )
 
+# Add IRQ tests
+add_subdirectory( irq )
+
 # Finalize testing
 test_finalize ()
