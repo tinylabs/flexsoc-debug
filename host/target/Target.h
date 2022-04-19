@@ -36,6 +36,9 @@ typedef enum {
   MODE_SEQUENTIAL = 1
 } brg_mode_t;
 
+// IRQ handler type
+typedef void (*irq_handler) (uint8_t irq);
+
 class Target {
 
   static Target *inst;
@@ -86,8 +89,15 @@ private:
   uint32_t Reset (bool pswitch);
   const char *ADIv5_Stat (adiv5_stat_t code);
   
-  // Access CSRs
+  // Access ID/version
   uint32_t FlexsocID (void);
+
+  // Enable IRQ scanning
+  void IRQScanEn (bool enabled);
+  
+  // Async IRQ handlers
+  void RegisterIRQHandler (irq_handler);
+  void UnregisterIRQHandler (void);
 };
 
 #endif /* TARGET_H */

@@ -6,4 +6,4 @@
 add_library( irq irq.c )
 
 # Add tests here...
-fusesoc_irq_test( test-remote-irq irq_simple remote-irq.c )
+fusesoc_irq_test( test-remote-irq irq_simple remote-irq.cpp )

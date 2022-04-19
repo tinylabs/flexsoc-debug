@@ -6,6 +6,7 @@
  *  2020
  */
 #include <unistd.h>
+#include <cassert>
 
 #include "Target.h"
 #include "flexsoc.h"
@@ -14,6 +15,20 @@
 
 // Singleton pointer
 Target *Target::inst = NULL;
+
+// Single callback instance
+static irq_handler cb = NULL;
+static void flexsoc_irq_convert (uint8_t *buf, int len)
+{
+  // Assert we have a valid callback
+  assert (cb != NULL);
+  
+  // Make sure length is 2
+  assert (len == 2);
+
+  // Pass IRQ to callback
+  cb (buf[1]);
+}
 
 Target::Target (char *id)
 {
@@ -270,4 +285,21 @@ void Target::BridgeMode (brg_mode_t mode)
       csr->seq (1);
       break;
   }
+}
+
+void Target::IRQScanEn (bool enabled)
+{
+  csr->irq_scan (enabled);
+}
+
+void Target::RegisterIRQHandler (irq_handler handler)
+{
+  cb = handler;
+  flexsoc_register (&flexsoc_irq_convert);
+}
+
+void Target::UnregisterIRQHandler (void)
+{
+  flexsoc_unregister ();
+  cb = NULL;
 }

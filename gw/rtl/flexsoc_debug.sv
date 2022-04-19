@@ -95,6 +95,12 @@ module flexsoc_debug
    logic                      adiv5_rden, adiv5_rdempty;
    logic [2:0]                adiv5_stat;
 
+   // target => host mux for AHB3 response and 
+   // async IRQ generation from debug_bridge
+   logic arb_WRFULL, arb_WREN;
+   logic [7:0] arb_WRDATA;
+   logic irq_WRFULL, irq_WREN;
+   logic [7:0] irq_WRDATA;   
    
    // Basic routing
    // >= 0xF000.0000 = CSR
@@ -114,6 +120,7 @@ module flexsoc_debug
    assign bridge_en_i = bridge_en_o;
    assign apsel_i = apsel_o;
    assign seq_i = seq_o;
+   assign irq_scan_i = irq_scan_o;
    
    // Assign return path to last selection
    logic        csr_sel;
@@ -232,6 +239,7 @@ module flexsoc_debug
                      .STAT          (brg_adiv5_stat),
                      .APSEL         (apsel_o),
                      .SEQ           (seq_o),
+                     .IRQSCAN       (irq_scan_o),
                      // AHB3 interface
                      .HSEL          (bridge_ahb3_HSEL),
                      .HADDR         (host_ahb3_HADDR),
@@ -251,7 +259,11 @@ module flexsoc_debug
                      .ADIv5_WRFULL  (brg_adiv5_wrfull),
                      .ADIv5_RDDATA  (brg_adiv5_rddata),
                      .ADIv5_RDEN    (brg_adiv5_rden),
-                     .ADIv5_RDEMPTY (brg_adiv5_rdempty)
+                     .ADIv5_RDEMPTY (brg_adiv5_rdempty),
+                     // Async IRQ generation during IRQ_SCAN=1
+                     .IRQ_WREN      (irq_WREN),
+                     .IRQ_WRFULL    (irq_WRFULL),
+                     .IRQ_WRDATA    (irq_WRDATA)
                      );
 
    // Debug MUX
@@ -279,7 +291,30 @@ module flexsoc_debug
               .TMSOE         (TMSOE),
               .TMSIN         (TMSIN)
               );
-   
+
+   // Create arbiter between AHB3 master responses
+   // and asynchronous IRQ events
+   // clock domain: SYS_CLK
+   fifo_arb_tx #(
+                 .DWIDTH (8),
+                 .AWIDTH (3))
+   u_arb_tx (
+             .CLK         (CLK),
+             .RESETn      (SYS_RESETn),
+             // AHB3 master response
+             .c1_wren     (master_WREN),
+             .c1_wrdata   (master_WRDATA),
+             .c1_wrfull   (master_WRFULL),
+             // Async IRQ generator (debug_bridge)
+             .c2_wren     (irq_WREN),
+             .c2_wrdata   (irq_WRDATA),
+             .c2_wrfull   (irq_WRFULL),
+             // Output to dual_clk_fifo
+             .fifo_wrfull (arb_WRFULL),
+             .fifo_wren   (arb_WREN),
+             .fifo_wrdata (arb_WRDATA)
+             );
+      
    // AHB3-master => Transport
    dual_clock_fifo #(
                      .ADDR_WIDTH   (8),
@@ -289,9 +324,9 @@ module flexsoc_debug
               .rd_clk_i   (TRANSPORT_CLK),
               .rd_rst_i   (~TRANSPORT_RESETn),
               .wr_rst_i   (~SYS_RESETn),
-              .wr_en_i    (master_WREN),
-              .wr_data_i  (master_WRDATA),
-              .full_o     (master_WRFULL),
+              .wr_en_i    (arb_WREN),
+              .wr_data_i  (arb_WRDATA),
+              .full_o     (arb_WRFULL),
               .rd_en_i    (trans_RDEN),
               .rd_data_o  (trans_RDDATA),
               .empty_o    (trans_RDEMPTY)

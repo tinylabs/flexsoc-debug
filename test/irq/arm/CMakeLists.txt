@@ -5,7 +5,7 @@
 function( arm_elf TARGET SOURCES )
   
   # Create executable
-  add_executable( ${TARGET} ${SOURCES} ${ARGN} )
+  add_executable( ${TARGET} ${SOURCES} ${ARGN} common.S )
 
   # Link to common lib
   target_link_libraries( ${TARGET} c )

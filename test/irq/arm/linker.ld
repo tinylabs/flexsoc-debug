@@ -1,12 +1,10 @@
-/* Define the end of RAM and limit of stack memory */
-/* (4KB SRAM on the STM32F031x6 line, 4096 = 0x1000) */
-/* (RAM starts at address 0x20000000) */
-_estack = 0x20004000;
+/* 2kB RAM needed for tests */
+_estack = 0x20000800;
 
 MEMORY
 {
-    FLASH ( rx )      : ORIGIN = 0x00000000, LENGTH = 16k
-    RAM ( rxw )       : ORIGIN = 0x20000000, LENGTH = 16k
+    FLASH ( rx )      : ORIGIN = 0x00000000, LENGTH = 2k
+    RAM ( rxw )       : ORIGIN = 0x20000000, LENGTH = 2k
 }
 
 SECTIONS

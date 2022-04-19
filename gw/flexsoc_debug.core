@@ -11,6 +11,7 @@ filesets:
             - ahb3lite_pkg
             - arm_debug
             - uart_fifo
+            - fifo_arb_tx
             - cdc_utils
         files:
             - rtl/flexsoc_debug.sv
@@ -56,6 +57,9 @@ generate:
                     width: 8
                     type: rw
                 seq:
+                    width: 1
+                    type: rw
+                irq_scan:
                     width: 1
                     type: rw
                 # ADIv5 interface

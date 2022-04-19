@@ -3,6 +3,7 @@
  */
 
 #include "irq.h"
+#include "Target.h"
 
 int main (int argc, char **argv)
 {
@@ -11,6 +12,8 @@ int main (int argc, char **argv)
 
   // Send IRQ 0
   pulse_irq (0);
+
+  // Check if we received IRQ
   
   // Clean up IRQ
   irq_exit ();
