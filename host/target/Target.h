@@ -37,7 +37,7 @@ typedef enum {
 } brg_mode_t;
 
 // IRQ handler type
-typedef void (*irq_handler) (uint8_t irq);
+typedef void (*irq_handler_t) (uint8_t irq);
 
 class Target {
 
@@ -96,10 +96,8 @@ private:
   void IRQScanEn (bool enabled);
   
   // Async IRQ handlers
-  void RegisterIRQHandler (irq_handler);
+  void RegisterIRQHandler (irq_handler_t);
   void UnregisterIRQHandler (void);
 };
 
 #endif /* TARGET_H */
-
-

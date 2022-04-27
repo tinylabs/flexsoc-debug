@@ -1,34 +1,29 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Mon Apr 18 17:52:14 2022
+[*] Wed Apr 20 19:15:46 2022
 [*]
-[dumpfile] "/home/elliot/projects/flexsoc-debug/build/test/api/test-jtag-mem-bridge.vcd"
-[dumpfile_mtime] "Mon Apr 18 17:50:42 2022"
-[dumpfile_size] 61542749
+[dumpfile] "/home/elliot/projects/flexsoc-debug/build/test/irq/test-remote-irq.fst"
+[dumpfile_mtime] "Wed Apr 20 19:15:08 2022"
+[dumpfile_size] 58589
 [savefile] "/home/elliot/projects/flexsoc-debug/test/gtkwave/debug_bridge.gtkw"
-[timestart] 1822260
-[size] 2560 1403
+[timestart] 0
+[size] 2560 1289
 [pos] -1 -1
-*-14.000000 1877880 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-13.000000 11100 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.flexsoc_debug.
 [treeopen] TOP.flexsoc_debug.u_debug_bridge.
 [sst_width] 221
 [signals_width] 273
 [sst_expanded] 1
-[sst_vpaned_height] 423
+[sst_vpaned_height] 467
 @28
 TOP.CLK
-TOP.PHY_CLK
-TOP.PHY_CLKn
-TOP.TRANSPORT_CLK
 TOP.RESETn
 TOP.TCK
 TOP.TDI
 TOP.TDO
-@29
 TOP.TMSOUT
-@28
 TOP.TMSIN
 TOP.TMSOE
 @200
@@ -46,6 +41,7 @@ TOP.flexsoc_debug.u_debug_bridge.APSEL[7:0]
 TOP.flexsoc_debug.u_debug_bridge.RESETn
 TOP.flexsoc_debug.u_debug_bridge.STAT[2:0]
 TOP.flexsoc_debug.u_debug_bridge.SEQ
+TOP.flexsoc_debug.u_debug_bridge.IRQSCAN
 @200
 -
 @28
@@ -77,7 +73,7 @@ TOP.flexsoc_debug.u_debug_bridge.ahb_wnr
 @200
 -
 @24
-TOP.flexsoc_debug.u_debug_bridge.state[3:0]
+TOP.flexsoc_debug.u_debug_bridge.state[4:0]
 @28
 TOP.flexsoc_debug.u_debug_bridge.check_resp
 TOP.flexsoc_debug.u_debug_bridge.cmd_complete
@@ -100,8 +96,19 @@ TOP.flexsoc_debug.u_debug_bridge.ADIv5_RDEN
 TOP.flexsoc_debug.u_debug_bridge.ADIv5_RDDATA[34:0]
 @28
 TOP.flexsoc_debug.u_debug_bridge.ADIv5_WRFULL
+TOP.flexsoc_debug.u_debug_bridge.ADIv5_INHIBIT
 TOP.flexsoc_debug.u_debug_bridge.ADIv5_WREN
 @22
 TOP.flexsoc_debug.u_debug_bridge.ADIv5_WRDATA[35:0]
+@200
+-
+@28
+TOP.flexsoc_debug.u_debug_bridge.IRQ_WREN
+TOP.flexsoc_debug.u_debug_bridge.IRQ_WRFULL
+TOP.flexsoc_debug.u_debug_bridge.irq_scan_active
+TOP.flexsoc_debug.u_debug_bridge.irq_scan_error
+TOP.flexsoc_debug.u_debug_bridge.irq_scan_pause
+@22
+TOP.flexsoc_debug.u_debug_bridge.IRQ_WRDATA[7:0]
 [pattern_trace] 1
 [pattern_trace] 0

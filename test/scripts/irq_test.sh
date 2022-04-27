@@ -30,7 +30,7 @@ if [ $# -eq 6 ]; then
     EXE=$3
     HW=$4
     TRACE=$5
-    ARM_ELF=$6
+    ARM_BIN=$6
     
     # Parse port from host
     HOST_PORT=($(echo $4 | tr ':' ' '))
@@ -51,7 +51,7 @@ fi
 if [ -n "$REMOTE" ]; then
     # Trace if necessary
     if [ "$TRACE" = true ]; then
-        $REMOTE -j -g --vcd=${EXE}_remote.vcd --elf-load=$ARM_ELF &
+        $REMOTE -j -g --vcd=${EXE}_remote.vcd --bin-load=$ARM_BIN &
     else
         $REMOTE -j -g --elf-load=$ARM_ELF &
     fi

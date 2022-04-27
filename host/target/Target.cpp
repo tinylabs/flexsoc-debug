@@ -17,7 +17,7 @@
 Target *Target::inst = NULL;
 
 // Single callback instance
-static irq_handler cb = NULL;
+static irq_handler_t cb = NULL;
 static void flexsoc_irq_convert (uint8_t *buf, int len)
 {
   // Assert we have a valid callback
@@ -292,7 +292,7 @@ void Target::IRQScanEn (bool enabled)
   csr->irq_scan (enabled);
 }
 
-void Target::RegisterIRQHandler (irq_handler handler)
+void Target::RegisterIRQHandler (irq_handler_t handler)
 {
   cb = handler;
   flexsoc_register (&flexsoc_irq_convert);

@@ -86,10 +86,10 @@ function( fusesoc_api_test NAME SOURCES)
     COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/api_test.sh ${VERILATOR_SIM} ${REMOTE_SIM} $<TARGET_FILE:${NAME}> ${FLEXSOC_HW} false ) # Set to true to trace   
 endfunction( fusesoc_api_test )
 
-function( fusesoc_irq_test NAME ARM_ELF SOURCES)
+function( fusesoc_irq_test NAME ARM_EXE SOURCES)
   add_executable( ${NAME} ${SOURCES} ${ARGN} )
   target_link_libraries( ${NAME} flexsoc target irq )
   add_test(
     NAME ${NAME}
-    COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/irq_test.sh ${VERILATOR_SIM} ${REMOTE_SIM} $<TARGET_FILE:${NAME}> ${FLEXSOC_HW} false ${ARM_ELF} ) # Set to true to trace   
+    COMMAND ${PROJECT_SOURCE_DIR}/test/scripts/irq_test.sh ${VERILATOR_SIM} ${REMOTE_SIM} $<TARGET_FILE:${NAME}> ${FLEXSOC_HW} false ${ARM_EXE}.bin ) # Set to true to trace   
 endfunction( fusesoc_irq_test )

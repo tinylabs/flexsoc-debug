@@ -21,7 +21,7 @@ enable_language( C CXX ASM )
 
 # Cross-compile and stop if building target source
 if( BUILD_ARM )
-  add_subdirectory( test/irq/arm )
+  add_subdirectory( target )
   return ()
 endif( BUILD_ARM )
 
