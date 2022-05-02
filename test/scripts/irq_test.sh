@@ -51,9 +51,9 @@ fi
 if [ -n "$REMOTE" ]; then
     # Trace if necessary
     if [ "$TRACE" = true ]; then
-        $REMOTE -j -g --vcd=${EXE}_remote.vcd --bin-load=$ARM_BIN &
+        $REMOTE -j -g --vcd=${EXE}_remote.vcd &
     else
-        $REMOTE -j -g --elf-load=$ARM_ELF &
+        $REMOTE -j -g &
     fi
     REMOTE_PID=$!
     sleep 0.5
@@ -70,7 +70,7 @@ if [ -n "$SIM" ]; then
 fi
 
 # Run test
-$EXE $HW
+$EXE $HW $ARM_BIN
 RV=$?
 echo "Result=" $RV
 

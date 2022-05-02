@@ -37,7 +37,7 @@ typedef enum {
 } brg_mode_t;
 
 // IRQ handler type
-typedef void (*irq_handler_t) (uint8_t irq);
+typedef void (*irq_handler_t) (uint8_t ctl, uint8_t irq);
 
 class Target {
 
@@ -46,6 +46,9 @@ class Target {
 private:
   flexdbg_csr *csr;
   Target (char *id);
+  bool ap_enabled = false;
+  int timeout = 20;
+  uint8_t ap = 0;
   
  public:
 
@@ -56,8 +59,17 @@ private:
   // Destructor
   virtual ~Target ();
 
+  void SetTimeout (int timeout) {this->timeout = timeout;}
+  
   // Validate CRC32 of interface
   bool Validate (void);
+
+  // Must be called before AP used
+  int EnableAP (bool do_enable);
+  bool APEnabled (void) { return ap_enabled; }
+
+  // Set 8bit AP (typically MEM-AP is 0)
+  void SetAP (uint8_t ap) { this->ap = ap; }
   
   // General APIs
   void ReadW (uint32_t addr, uint32_t *data, uint32_t cnt);
@@ -72,32 +84,30 @@ private:
   // Switch modes
   void SetPhy (phy_t phy);
 
-  // Enable bridge
+  // Bridge functions
   void BridgeEn (bool enabled);
-
-  // Select AP for bridge mode
   void BridgeAPSel (uint8_t ap);
-
-  // Setup bridge mode
   void BridgeMode (brg_mode_t mode);
+  void BridgeIRQScanEn (bool enabled);
+  void BridgeIRQBuf (uint32_t addr);
   
   // Read/Write ADIv5
   adiv5_stat_t WriteDP (uint8_t addr, uint32_t data);
   adiv5_stat_t ReadDP (uint8_t addr, uint32_t *data);
-  adiv5_stat_t WriteAP (uint8_t ap, uint8_t addr, uint32_t data);
-  adiv5_stat_t ReadAP (uint8_t ap, uint8_t addr, uint32_t *data);
+  adiv5_stat_t WriteAP (uint8_t addr, uint32_t data);
+  adiv5_stat_t ReadAP (uint8_t addr, uint32_t *data);
   uint32_t Reset (bool pswitch);
   const char *ADIv5_Stat (adiv5_stat_t code);
   
   // Access ID/version
   uint32_t FlexsocID (void);
-
-  // Enable IRQ scanning
-  void IRQScanEn (bool enabled);
   
   // Async IRQ handlers
   void RegisterIRQHandler (irq_handler_t);
   void UnregisterIRQHandler (void);
+
+  // Acknowledge IRQ
+  void IRQAck (uint8_t cmd);
 };
 
 #endif /* TARGET_H */

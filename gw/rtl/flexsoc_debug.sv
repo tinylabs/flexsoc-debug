@@ -97,10 +97,10 @@ module flexsoc_debug
 
    // target => host mux for AHB3 response and 
    // async IRQ generation from debug_bridge
-   logic arb_WRFULL, arb_WREN;
-   logic [7:0] arb_WRDATA;
-   logic irq_WRFULL, irq_WREN;
-   logic [7:0] irq_WRDATA;   
+   logic arb_WRFULL, arb_WREN, arb_RDEN, arb_RDEMPTY;
+   logic [7:0] arb_WRDATA, arb_RDDATA;
+   logic irq_WRFULL, irq_WREN, irq_RDEN, irq_RDEMPTY;
+   logic [7:0] irq_WRDATA, irq_RDDATA;   
    
    // Basic routing
    // >= 0xF000.0000 = CSR
@@ -121,6 +121,7 @@ module flexsoc_debug
    assign apsel_i = apsel_o;
    assign seq_i = seq_o;
    assign irq_scan_i = irq_scan_o;
+   assign irq_base_i = irq_base_o;
    
    // Assign return path to last selection
    logic        csr_sel;
@@ -240,6 +241,8 @@ module flexsoc_debug
                      .APSEL         (apsel_o),
                      .SEQ           (seq_o),
                      .IRQSCAN       (irq_scan_o),
+                     .IRQCNT        (irq_cnt),
+                     .IRQBASE       (irq_base_o),
                      // AHB3 interface
                      .HSEL          (bridge_ahb3_HSEL),
                      .HADDR         (host_ahb3_HADDR),
@@ -263,14 +266,17 @@ module flexsoc_debug
                      // Async IRQ generation during IRQ_SCAN=1
                      .IRQ_WREN      (irq_WREN),
                      .IRQ_WRFULL    (irq_WRFULL),
-                     .IRQ_WRDATA    (irq_WRDATA)
+                     .IRQ_WRDATA    (irq_WRDATA),
+                     // IRQ acknowledgments
+                     .IRQ_RDEN      (irq_RDEN),
+                     .IRQ_RDEMPTY   (irq_RDEMPTY),
+                     .IRQ_RDDATA    (irq_RDDATA)
                      );
 
    // Debug MUX
    adiv5_mux
      u_adiv5_mux (
               .CLK           (CLK),
-              //.PHY_CLK       (phy_clk_div),
               .SYS_RESETn    (SYS_RESETn),
               .PHY_CLK       (PHY_CLK),
               .PHY_CLKn      (PHY_CLKn),
@@ -292,12 +298,31 @@ module flexsoc_debug
               .TMSIN         (TMSIN)
               );
 
+   // Create arbiter between AHB3 requests
+   // and IRQ acknowledgments
+   fifo_arb_rx #(
+                 .DWIDTH (8),
+                 .AWIDTH (5))
+   u_arb_rx (
+             .CLK           (CLK),
+             .RESETn        (SYS_RESETn),
+             .c1_rden       (master_RDEN),
+             .c1_rdempty    (master_RDEMPTY),
+             .c1_rddata     (master_RDDATA),
+             .c2_rden       (irq_RDEN),
+             .c2_rdempty    (irq_RDEMPTY),
+             .c2_rddata     (irq_RDDATA),
+             .fifo_rden     (arb_RDEN),
+             .fifo_rdempty  (arb_RDEMPTY),
+             .fifo_rddata   (arb_RDDATA)
+             );
+   
    // Create arbiter between AHB3 master responses
    // and asynchronous IRQ events
    // clock domain: SYS_CLK
    fifo_arb_tx #(
                  .DWIDTH (8),
-                 .AWIDTH (3))
+                 .AWIDTH (4))
    u_arb_tx (
              .CLK         (CLK),
              .RESETn      (SYS_RESETn),
@@ -341,9 +366,9 @@ module flexsoc_debug
               .wr_clk_i   (TRANSPORT_CLK),
               .rd_rst_i   (~SYS_RESETn),
               .wr_rst_i   (~TRANSPORT_RESETn),
-              .rd_en_i    (master_RDEN),
-              .rd_data_o  (master_RDDATA),
-              .empty_o    (master_RDEMPTY),
+              .rd_en_i    (arb_RDEN),
+              .rd_data_o  (arb_RDDATA),
+              .empty_o    (arb_RDEMPTY),
               .wr_en_i    (trans_WREN),
               .wr_data_i  (trans_WRDATA),
               .full_o     (trans_WRFULL)

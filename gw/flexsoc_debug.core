@@ -12,6 +12,7 @@ filesets:
             - arm_debug
             - uart_fifo
             - fifo_arb_tx
+            - fifo_arb_rx
             - cdc_utils
         files:
             - rtl/flexsoc_debug.sv
@@ -62,6 +63,12 @@ generate:
                 irq_scan:
                     width: 1
                     type: rw
+                irq_base:
+                    width: 32
+                    type: rw
+                irq_cnt:
+                    width: 32
+                    type: ro
                 # ADIv5 interface
                 adiv5_cmd:
                     width: 4

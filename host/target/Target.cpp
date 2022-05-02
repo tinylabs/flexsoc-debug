@@ -27,7 +27,7 @@ static void flexsoc_irq_convert (uint8_t *buf, int len)
   assert (len == 2);
 
   // Pass IRQ to callback
-  cb (buf[1]);
+  cb (buf[0], buf[1]);
 }
 
 Target::Target (char *id)
@@ -41,6 +41,10 @@ Target::Target (char *id)
   csr = new flexdbg_csr (CSR_BASE, &flexsoc_reg_read, &flexsoc_reg_write);
   if (!csr)
     log (LOG_FATAL, "Failed to inst flexsoc_csr");
+
+  // Validate CSR matches
+  if (Validate () != 0)
+    log (LOG_FATAL, "CSR Mismatch - regen gateware/csr");
 }
 
 Target::~Target ()
@@ -68,6 +72,46 @@ Target *Target::Ptr (void)
 bool Target::Validate (void)
 {
   return CRC32 != csr->crc32 ();
+}
+
+int Target::EnableAP (bool do_enable)
+{
+  int i;
+  uint32_t val;
+  
+  // Write to enable AP
+  if (do_enable) {
+    if (WriteDP (4, 0x50000000) == ADIv5_OK)
+      return -1;
+    for (i = 0; i < timeout; i++) {
+      if (ReadDP (4, &val) == ADIv5_OK)
+        return -1;
+      if ((val & 0xF0000000) == 0xF0000000)
+        break;
+    }
+  }
+  // Disable AP
+  else {
+    if (WriteDP (4, 0x00000000) == ADIv5_OK)
+      return -1;
+    for (i = 0; i < timeout; i++) {
+      if (ReadDP (4, &val) == ADIv5_OK)
+        return -1;
+      if ((val & 0xF0000000) == 0x00000000)
+        break;
+    }
+  }
+  // Check if we timed out
+  if (i == timeout)
+    return -1;
+
+  // Setup default CSW - Priv data word access
+  if (do_enable)
+    WriteAP (0, 0xA3000042);
+
+  // Save status
+  ap_enabled = do_enable;
+  return 0;
 }
 
 // General APIs
@@ -188,7 +232,7 @@ adiv5_stat_t Target::ReadDP (uint8_t addr, uint32_t *data)
   return ADIv5_OK;
 }
 
-adiv5_stat_t Target::WriteAP (uint8_t ap, uint8_t addr, uint32_t data)
+adiv5_stat_t Target::WriteAP (uint8_t addr, uint32_t data)
 {
   uint32_t stat;
   adiv5_stat_t rv;
@@ -213,7 +257,7 @@ adiv5_stat_t Target::WriteAP (uint8_t ap, uint8_t addr, uint32_t data)
   return (adiv5_stat_t)(stat >> 2);
 }
 
-adiv5_stat_t Target::ReadAP (uint8_t ap, uint8_t addr, uint32_t *data)
+adiv5_stat_t Target::ReadAP (uint8_t addr, uint32_t *data)
 {
   uint32_t stat;
   adiv5_stat_t rv;
@@ -287,9 +331,14 @@ void Target::BridgeMode (brg_mode_t mode)
   }
 }
 
-void Target::IRQScanEn (bool enabled)
+void Target::BridgeIRQScanEn (bool enabled)
 {
   csr->irq_scan (enabled);
+}
+
+void Target::BridgeIRQBuf (uint32_t addr)
+{
+  csr->irq_base (addr);
 }
 
 void Target::RegisterIRQHandler (irq_handler_t handler)
@@ -302,4 +351,9 @@ void Target::UnregisterIRQHandler (void)
 {
   flexsoc_unregister ();
   cb = NULL;
+}
+
+void Target::IRQAck (uint8_t cmd)
+{
+  flexsoc_send (&cmd, 1);
 }

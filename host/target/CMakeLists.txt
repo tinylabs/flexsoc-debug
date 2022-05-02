@@ -9,6 +9,7 @@ add_definitions( -DHOST_INTERFACE=1 )
 # Create target
 add_library( target
   Target.cpp
+  Debug.cpp
   )
 
 # Enable debug

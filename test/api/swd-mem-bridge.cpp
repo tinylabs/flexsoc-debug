@@ -198,19 +198,19 @@ int main (int argc, char **argv)
   assert ((val & 0xF0000000) == 0xF0000000);
 
   // Write CSW for word access
-  assert (target->WriteAP (0, 0, 0xA2000002) == ADIv5_OK);
+  assert (target->WriteAP (0, 0xA2000002) == ADIv5_OK);
 
   // Set TAR to access DHCSR
-  assert (target->WriteAP (0, 4, 0xE000EDF0) == ADIv5_OK);
+  assert (target->WriteAP (4, 0xE000EDF0) == ADIv5_OK);
 
   // Try to halt processor
   for (i = 0; i < 10; i++) {
 
     // Write key + C_HALT to DHCSR
-    assert (target->WriteAP (0, 0xC, 0xA05F0003) == ADIv5_OK);
+    assert (target->WriteAP (0xC, 0xA05F0003) == ADIv5_OK);
 
     // Check S_HALT to see if we halted
-    assert (target->ReadAP (0, 0xC, &val) == ADIv5_OK);
+    assert (target->ReadAP (0xC, &val) == ADIv5_OK);
     if (val & (1 << 17))
       break;
   }
