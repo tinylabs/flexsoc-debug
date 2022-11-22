@@ -14,14 +14,15 @@ function ctrl_c() {
 
     # Kill all verilator instances
     if [ -n "$SIM_PID" ]; then
-        kill -9 $SIM_PID
+        kill -2 $SIM_PID
+        sleep 1
     fi
     if [ -n "$REMOTE_PID" ]; then
-        kill -9 $REMOTE_PID
+        kill -2 $REMOTE_PID
     fi
 }
 
-# Running on read hardware
+# Running on real hardware
 if [ $# -eq 2 ]; then
 
     # Get test and hardware
@@ -51,17 +52,19 @@ fi
 if [ -n "$REMOTE" ]; then
     # Trace if necessary
     if [ "$TRACE" = true ]; then
-        $REMOTE -j --vcd=${EXE}_remote.vcd &
+        rm ${EXE}_remote.fst
+        $REMOTE -j --fst=${EXE}_remote.fst &
     else
         $REMOTE -j &
     fi
     REMOTE_PID=$!
-    sleep 0.5
+    sleep 2
 fi
 if [ -n "$SIM" ]; then
     # Trace if necessary
     if [ "$TRACE" = true ]; then
-        $SIM -u$PORT -r --vcd=${EXE}.vcd &
+        rm ${EXE}.fst
+        $SIM -u$PORT -r --fst=${EXE}.fst &
     else
         $SIM -u$PORT -r &
     fi
@@ -76,7 +79,7 @@ echo "Result=" $RV
 
 # Sleep for a second to allow flushing of traces
 if [ "$TRACE" = true ]; then
-    sleep 1
+    sleep 3
 fi
 
 # Kill sim instances
